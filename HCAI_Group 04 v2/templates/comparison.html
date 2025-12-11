@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Animal Comparison</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f7f7fb;
+    margin: 0;
+    padding: 1rem;
+    color: #2d2d2d;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+h2 {
+    color: #4a4aff;
+}
+
+.image-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: center;
+}
+
+.image-card {
+    text-align: center;
+    max-width: 350px;
+}
+
+.image-card img {
+    width: 250px;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 2px solid #4a4aff;
+}
+
+.image-card h3 {
+    margin: 0.5rem 0;
+}
+
+.analysis-box {
+    text-align: left;
+    background: #eaf4ea;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.analysis-box ul {
+    padding-left: 1rem;
+    margin: 0.5rem 0;
+}
+
+.bottom-btns {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.bottom-btns button {
+    padding: 0.8rem 1.6rem;
+    background: #4a4aff;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h2>Similar Animals Based on MobileNetV2 Prediction</h2>
+        <p>MobileNetV2 analyzed your uploaded image and determined these animals share similar features:</p>
+        <div class="image-grid" id="imageGrid"></div>
+    </div>
+
+    <div class="bottom-btns">
+        <button id="backBtn">⬅ Back to Prediction</button>
+    </div>
+</div>
+
+<script>
+// Back button
+document.getElementById('backBtn').addEventListener('click', function() {
+    window.location.href = "{{ url_for('prediction_page') }}";
+});
+
+// Load images and analysis
+document.addEventListener("DOMContentLoaded", function () {
+    const container = document.getElementById("imageGrid");
+
+    // Uploaded image
+    const uploadedImage = localStorage.getItem("uploadedImage");
+    const predictedAnimal = localStorage.getItem("predictedAnimal") || "Dog";
+    const uploadedConfidence = localStorage.getItem("predictedConfidence") || 87;
+
+    if (uploadedImage) {
+        const card = document.createElement("div");
+        card.className = "image-card";
+
+        const img = document.createElement("img");
+        img.src = uploadedImage;
+        img.alt = predictedAnimal;
+        card.appendChild(img);
+
+        const title = document.createElement("h3");
+        title.innerText = `${predictedAnimal} ${uploadedConfidence}%`;
+        card.appendChild(title);
+
+        const analysis = document.createElement("div");
+        analysis.className = "analysis-box";
+        analysis.innerHTML = `<strong>Classification Analysis</strong>
+        <ul>
+          <li>✓ Best match based on detected features</li>
+          <li>• Distinctive floppy ears detected</li>
+          <li>• Domestic collar visible</li>
+          <li>• Friendly facial proportions</li>
+          <li>• Golden fur color typical of retrievers</li>
+        </ul>`;
+        card.appendChild(analysis);
+
+        container.appendChild(card);
+    }
+
+    // Similar animals mapping
+    const similarAnimalsMap = {
+        "Dog": [
+            { file: "fox.jpg", name: "Fox", confidence: 8 },
+            { file: "wolf.jpg", name: "Wolf", confidence: 5 }
+        ],
+        "Cat": [
+            { file: "tiger.jpg", name: "Tiger", confidence: 10 },
+            { file: "lion.jpg", name: "Lion", confidence: 7 }
+        ]
+    };
+
+    const similarFiles = similarAnimalsMap[predictedAnimal] || [];
+
+    similarFiles.forEach(animal => {
+        const card = document.createElement("div");
+        card.className = "image-card";
+
+        const img = document.createElement("img");
+        img.src = `static/uploaded_images/${animal.file}`;
+        img.alt = animal.name;
+        card.appendChild(img);
+
+        const title = document.createElement("h3");
+        title.innerText = `${animal.name} ${animal.confidence}%`;
+        card.appendChild(title);
+
+        const analysis = document.createElement("div");
+        analysis.className = "analysis-box";
+        analysis.innerHTML = `<strong>Key Differences</strong>
+        <ul>
+          <li>Missing key identifying features for ${animal.name} classification</li>
+          <li>• ${animal.name}s have pointed, upright ears</li>
+          <li>• No domestic collar indicators</li>
+          <li>• Different snout shape</li>
+          <li>• Typically more slender build</li>
+        </ul>`;
+        card.appendChild(analysis);
+
+        container.appendChild(card);
+    });
+});
+</script>
+
+</body>
+</html>
