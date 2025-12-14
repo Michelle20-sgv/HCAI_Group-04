@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Animal Prediction Explainability</title>
+<link href="https://cdn.jsdelivr.net/npm/chart.js" rel="stylesheet">
+<style>
+body { font-family: Arial, sans-serif; background: #f7f7fb; padding: 1rem; color: #2d2d2d; }
+.container { max-width: 1000px; margin: auto; display: flex; flex-direction: column; gap: 1.5rem; }
+.card { background: white; border-radius: 15px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+h2 { color: #4a4aff; }
+.image-container { text-align: center; }
+.image-container img { max-width: 100%; border-radius: 12px; margin: 10px 0; }
+.explanation-text { background: #eaf4ea; padding: 15px; border-radius: 10px; margin-top: 10px; }
+canvas { max-width: 100%; margin-top: 15px; }
+.bottom-btns { display: flex; justify-content: center; gap: 1rem; margin-top: 1rem; }
+.bottom-btns button { padding: 0.8rem 1.6rem; background: #4a4aff; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 1rem; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- CNN Info Section -->
+  <div class="card">
+    <h2>About MobileNetV2 CNN</h2>
+    <p>
+      Behind the scenes, your uploaded image is analyzed using <strong>MobileNetV2</strong>, a convolutional neural network (CNN). This network:
+    </p>
+    <ul>
+      <li>👁️ Detects and extracts key features from the image (ears, snout, fur patterns, etc.)</li>
+      <li>⚡ Efficiently classifies images even on low-resource devices</li>
+      <li>📊 Generates probability scores for top predictions (Top-3 animal guesses)</li>
+      <li>🌡️ Works with Grad-CAM to visualize which areas influenced the prediction</li>
+    </ul>
+    <p>This means every prediction you see is powered by a real CNN model running on the backend.</p>
+  </div>
+
+  <!-- Prediction & Grad-CAM -->
+  <div class="card">
+    <h2>Prediction Example</h2>
+    <div class="image-container">
+      <img id="uploadedImage" src="" alt="Uploaded Animal Image">
+      <p><em>Your uploaded image</em></p>
+    </div>
+
+    <p id = "predictionText"><strong>Prediction:</strong> Dog (92% confidence)</p>
+    <p><strong>Top 3 Predictions:</strong></p>
+    <canvas id="predictionChart"></canvas>
+
+    <div class="image-container">
+      <img src="placeholder_gradcam.jpg" alt="Grad-CAM Heatmap">
+      <p><em>Grad-CAM Heatmap shows where MobileNetV2 focused</em></p>
+    </div>
+
+    <div class="explanation-text">
+      <p><strong>Explanation:</strong> The CNN focused on the dog's <em>snout and tail</em> to classify it as a dog. 
+      It also considered a fox (5%) and a cat (3%), showing how the model reasons about uncertainty.</p>
+    </div>
+  </div>
+
+  <!-- Feature Importance -->
+  <div class="card">
+    <h2>Feature Contribution</h2>
+    <p>MobileNetV2 assigns importance to different features detected in the image:</p>
+    <canvas id="featureChart"></canvas>
+  </div>
+
+  <!-- Benefits of Explainability -->
+  <div class="card">
+    <h2>Why Explainability Matters</h2>
+    <ul>
+      <li>👀 Heatmaps show which parts of the image influenced the CNN.</li>
+      <li>📊 Confidence scores indicate model certainty.</li>
+      <li>📝 Text explanations help users understand the CNN’s reasoning.</li>
+      <li>🔄 Top-K predictions reveal alternative possibilities considered by the CNN.</li>
+    </ul>
+  </div>
+
+  <div class="bottom-btns">
+    <button id="backBtn">⬅ Back to Prediction</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.getElementById('backBtn').addEventListener('click', function() {
+    window.location.href = "{{ url_for('prediction_page') }}";
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const img = document.getElementById("uploadedImage");
+    const savedImage = localStorage.getItem("uploadedImage");
+    if (savedImage) img.src = savedImage;
+    else img.src = "static/default.png";
+
+    const mostLikely = localStorage.getItem("most_likely") || "Unknown";
+    const mostLikelyProb = localStorage.getItem("most_likely_prob") || "0";
+    const secondMost = localStorage.getItem("second_most") || "Unknown";
+    const secondMostProb = localStorage.getItem("second_most_prob") || "0";
+    const thirdMost = localStorage.getItem("third_most") || "Unknown";
+    const thirdMostProb = localStorage.getItem("third_most_prob") || "0";
+
+    document.getElementById('predictionText').innerHTML = `<strong>Prediction:</strong> ${mostLikely} (${mostLikelyProb}% confidence)`;
+    document.getElementById("predictionChart").textContent = mostLikely;
+
+    // Prediction chart
+    const ctx1 = document.getElementById('predictionChart').getContext('2d');
+    new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: [mostLikely, secondMost, thirdMost],
+            datasets: [{ label: 'Confidence (%)', data: [mostLikelyProb,secondMostProb,thirdMostProb], backgroundColor: ['#4CAF50','#FFC107','#F44336'] }]
+        },
+        options: { responsive:true, plugins:{ legend:{display:false}, title:{display:true,text:'Top 3 Predictions'} }, scales:{ y:{beginAtZero:true, max:100} } }
+    });
+
+    // Feature chart
+    const ctx2 = document.getElementById('featureChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'pie',
+        data: {
+            labels: ['Snout','Tail','Ears','Collar'],
+            datasets:[{ label:'Feature Contribution', data:[40,30,20,10], backgroundColor:['#FF6384','#36A2EB','#FFCE56','#4BC0C0'] }]
+        },
+        options:{ responsive:true, plugins:{ title:{ display:true, text:'Feature Importance (%)' } } }
+    });
+});
+</script>
+</body>
+</html>
