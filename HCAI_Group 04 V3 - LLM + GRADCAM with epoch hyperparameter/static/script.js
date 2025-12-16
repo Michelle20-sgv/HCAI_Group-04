@@ -1,0 +1,220 @@
+document.addEventListener("DOMContentLoaded", function () {
+
+    const uploadBtn = document.getElementById("Button");
+    const takePhotoBtn = document.getElementById("Button_0");
+    const infoText = document.getElementById("infoText");
+    const fileInput = document.getElementById("fileInput");
+    const logoImg = document.getElementById("logo");
+    const controls = document.getElementById("Container_4");
+    const heading = document.getElementById("Heading_2");
+    const subText = document.getElementById("Container_3");
+    const supportedText = document.getElementById("Container_5");
+
+    const previewWrapper = document.createElement("div");
+    previewWrapper.style.position = "relative";
+    previewWrapper.style.width = "100%";
+    previewWrapper.style.height = "100%";
+    previewWrapper.style.display = "flex";
+    logoImg.parentNode.insertBefore(previewWrapper, logoImg);
+    previewWrapper.appendChild(logoImg);
+
+    function cloneButtonStyle(targetBtn, sourceBtn) {
+        const s = window.getComputedStyle(sourceBtn);
+        Object.assign(targetBtn.style, {
+            width: s.width,
+            height: s.height,
+            borderRadius: s.borderRadius,
+            background: s.background,
+            color: s.color,
+            fontSize: s.fontSize,
+            fontWeight: s.fontWeight,
+            border: s.border,
+            padding: s.padding,
+            cursor: "pointer"
+        });
+    }
+
+    const btnContainer = document.createElement("div");
+    btnContainer.style.display = "none";
+    btnContainer.style.flexDirection = "row";
+    btnContainer.style.justifyContent = "center";
+    btnContainer.style.alignItems = "center";
+    btnContainer.style.width = "100%";
+    btnContainer.style.marginTop = "1rem";
+    btnContainer.style.gap = "1rem";
+    controls.appendChild(btnContainer);
+
+    const detailsBtn = document.createElement("button");
+    detailsBtn.innerHTML = `<span class="text">View Details</span>`;
+    cloneButtonStyle(detailsBtn, uploadBtn);
+    btnContainer.appendChild(detailsBtn);
+
+    const newImageBtn = document.createElement("button");
+    newImageBtn.innerHTML = `<span class="text">Choose Image</span>`;
+    cloneButtonStyle(newImageBtn, uploadBtn);
+    btnContainer.appendChild(newImageBtn);
+
+    const deleteBtn = document.createElement("div");
+    deleteBtn.innerHTML = "✖";
+    Object.assign(deleteBtn.style, {
+        position: "absolute",
+        top: "8px",
+        right: "8px",
+        width: "32px",
+        height: "32px",
+        display: "none",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: "18px",
+        fontWeight: "bold",
+        color: "white",
+        background: "rgba(0,0,0,0.7)",
+        borderRadius: "50%",
+        cursor: "pointer"
+    });
+    previewWrapper.appendChild(deleteBtn);
+
+    uploadBtn.addEventListener("click", () => fileInput.click());
+    newImageBtn.addEventListener("click", () => fileInput.click());
+
+    function validateImage(file) {
+        const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+        const maxSize = 10 * 1024 * 1024; // 10MB
+        if (!allowedTypes.includes(file.type)) return false;
+        if (file.size > maxSize) return false;
+        return true;
+    }
+
+    fileInput.addEventListener("change", async function () {
+        const file = this.files[0];
+        if (!file) return;
+        infoText.textContent = "";
+
+        if (!validateImage(file)) {
+            infoText.style.color = "red";
+            infoText.textContent = "❌ Only JPG, PNG, WebP and max 10MB allowed.";
+            fileInput.value = "";
+            return;
+        }
+
+        // Preview immediately
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            logoImg.src = e.target.result;
+            logoImg.style.objectFit = "cover";
+            logoImg.style.width = "100%";
+            logoImg.style.height = "100%";
+            logoImg.style.borderRadius = "1rem";
+
+            uploadBtn.style.display = "none";
+            takePhotoBtn.style.display = "none";
+            heading.style.display = "none";
+            subText.style.display = "none";
+            supportedText.style.display = "none";
+            btnContainer.style.display = "flex";
+            deleteBtn.style.display = "flex";
+        };
+        reader.readAsDataURL(file);
+
+        // Send to backend for animal validation
+        const formData = new FormData();
+        formData.append("file", file);
+
+        //disable the details button and display loading message
+        detailsBtn.disabled = true;
+        detailsBtn.style.opacity = "0.5";
+        detailsBtn.style.cursor = "not-allowed";
+        infoText.textContent = "Analyzing image...";
+        infoText.style.color = "#4a4aff";
+
+        try {
+            console.log("1. About to fetch...");
+            const res = await fetch("/predict", {
+                method: "POST",
+                body: formData
+            });
+
+            console.log("2. Fetch completed, status:", res.status);
+            console.log("3. Response OK?", res.ok);
+
+            const data = await res.json();
+            console.log("4. JSON parsed successfullly:", data);
+
+            if (!res.ok) {
+                console.log("5. Response not OK branch");
+                infoText.style.color = "red";
+                infoText.textContent = data.error;
+                logoImg.src = "static/uploaded_images/logo.png";
+                logoImg.style.objectFit = "contain";
+                deleteBtn.style.display = "none";
+                btnContainer.style.display = "none";
+                uploadBtn.style.display = "block";
+                takePhotoBtn.style.display = "block";
+                heading.style.display = "block";
+                subText.style.display = "block";
+                supportedText.style.display = "block";
+                fileInput.value = "";
+                return;
+            }
+
+            console.log("6. About to save to localStorage");
+            // Save prediction for details page
+            localStorage.setItem("uploadedFilename", file.name);
+            localStorage.setItem("most_likely", data.most_likely);
+            localStorage.setItem("most_likely_prob", data.most_likely_prob);
+            localStorage.setItem("most_likely_prob_50", data.most_likely_prob_50);
+            localStorage.setItem("most_likely_prob_200", data.most_likely_prob_200);
+            localStorage.setItem("second_most", data.second_most);
+            localStorage.setItem("second_most_prob", data.second_most_prob);
+            localStorage.setItem("second_most_prob_50", data.second_most_prob_50);
+            localStorage.setItem("third_most", data.third_most);
+            localStorage.setItem("third_most_prob", data.third_most_prob);
+            localStorage.setItem("third_most_prob_50", data.third_most_prob_50);
+            localStorage.setItem("third_most_prob_200", data.third_most_prob_200);
+            localStorage.setItem("explanation", data.explanation)
+            localStorage.setItem("gradcam_filename", data.gradcam_filename)
+            console.log("7. Successfully saved to localStorage!");
+
+            //re-enable the details button
+            detailsBtn.disabled = false;
+            detailsBtn.style.opacity = "1";
+            detailsBtn.style.cursor = "pointer";
+            infoText.textContent = "✓ Analysis complete!";
+            infoText.style.color = "#4caf50";
+
+        } catch (err) {
+            console.log("ERROR CAUGHT!");
+            console.log("Error type:", err.name);
+            console.log("Error message:", err.message);
+            console.log("Full error:", err);
+
+
+            infoText.style.color = "red";
+            infoText.textContent = "❌ Server error. Please try again.";
+            //re-enable button even on error
+            detailsBtn.disabled = false;
+            detailsBtn.style.opacity = "1";
+            detailsBtn.style.cursor = "pointer"
+        }
+    });
+
+    detailsBtn.addEventListener("click", () => {
+        if (!logoImg.src) return;
+        window.location.href = "/prediction";
+    });
+
+    deleteBtn.addEventListener("click", () => {
+        logoImg.src = "static/uploaded_images/logo.png";
+        logoImg.style.objectFit = "contain";
+        deleteBtn.style.display = "none";
+        btnContainer.style.display = "none";
+        uploadBtn.style.display = "block";
+        takePhotoBtn.style.display = "block";
+        heading.style.display = "block";
+        subText.style.display = "block";
+        supportedText.style.display = "block";
+        fileInput.value = "";
+        infoText.textContent = "";
+    });
+
+});
