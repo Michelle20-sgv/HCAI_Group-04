@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Animal Classification Results</title>
+
+<style>
+/* ---- GLOBAL ---- */
+body {
+  font-family: Arial, sans-serif;
+  background: #f7f7fb;
+  margin: 0;
+  padding: 1rem;
+  color: #2d2d2d;
+}
+
+.container {
+  max-width: 1400px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+/* ---- TOP SECTION WRAPPER ---- */
+.top-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1.5rem;
+}
+
+/* ---- IMAGE + HEATMAP CARD ---- */
+.image-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.image-card img {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+  border-radius: 1rem;
+}
+.heatmap-btn {
+  margin-top: 1rem;
+  background: #4a4aff;
+  color: white;
+  border: none;
+  padding: 0.7rem 1.2rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+.heatmap-box {
+  background: #ffecec;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-top: 1rem;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+/* ---- RESULTS CARD ---- */
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0.5rem 0;
+  font-size: 1rem;
+}
+.bar-bg {
+  width: 100%;
+  height: 10px;
+  background: #e3e3e3;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-left: 1rem;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 10px;
+}
+.dog { background: #4caf50; }
+.fox { background: #ff9800; }
+.wolf { background: #f44336; }
+
+.range-box {
+  margin-top: 1rem;
+}
+
+/* ---- MIDDLE SECTION ---- */
+.mid-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.feature-item {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 12px;
+  border-left: 6px solid #4caf50;
+  margin-bottom: 1rem;
+}
+
+/* ---- BOTTOM BUTTONS ---- */
+.bottom-btns {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.bottom-btns button {
+  padding: 0.8rem 1.6rem;
+  background: #4a4aff;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 900px) {
+  .top-grid {
+    grid-template-columns: 1fr;
+  }
+  .mid-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+
+</head>
+<body>
+
+<!-- Top Navigation Bar -->
+<nav class="side-nav">
+  <div class="nav-right">
+  </div>
+  <div class="nav-right">
+    <button onclick="goToHome()">Home</button>
+    <button onclick="goToComparison()">Comparison</button>
+    <button onclick="goToExplainability()">Explainability</button>
+  </div>
+</nav>
+
+<div class="container">
+  <!-- Your existing page content goes here -->
+</div>
+
+<div class="container">
+
+  <!-- TOP GRID SECTION -->
+  <div class="top-grid">
+
+    <!-- IMAGE CARD -->
+    <div class="card image-card">
+      <img id="previewImage" src="" alt="Uploaded Image" />
+      <h2 id="predictionTitle">Animal Prediction</h2>
+
+      <img id="GradCamImage" src="" alt="Uploaded Image" />
+      <div class="heatmap-box">
+        <strong>🔥 Attention Heatmap</strong>
+        <p>Red/yellow areas show where the AI focused most attention.</p>
+        <div>Resolution: 512×512</div>
+        <div>Processing time: 0.3s</div>
+      </div>
+    </div>
+
+    <!-- CLASSIFICATION RESULTS -->
+    <div class="card">
+      <h2>Classification Results</h2>
+
+      <div class="result-row">
+        <span>{{ most_likely }}</span>
+        <span style="color:#4caf50; font-weight:bold;">87%</span>
+      </div>
+      <div class="bar-bg">
+        <div class="bar-fill dog" style="width:87%;"></div>
+      </div>
+
+      <div class="result-row">
+        <span>Fox</span>
+        <span style="color:#ff9800; font-weight:bold;">8%</span>
+      </div>
+      <div class="bar-bg">
+        <div class="bar-fill fox" style="width:8%;"></div>
+      </div>
+
+      <div class="result-row">
+        <span>Wolf</span>
+        <span style="color:#f44336; font-weight:bold;">5%</span>
+      </div>
+      <div class="bar-bg">
+        <div class="bar-fill wolf" style="width:5%;"></div>
+      </div>
+
+      <div style="margin-top: 1.5rem; padding: 1rem; background: #f7f7fb; border-radius: 12px;">
+        <h3 style="margin-top: 0;">What does using 100 epochs do?</h3>
+        <p>Epochs refers to the amount of times that the model goes over the dataset during training. This involves the model making predictions based on the training dataset, then testing it against the testing set and making adjustments to its parameters. This means that increasing the number of epochs means that the model will allow the model to train more on the dataset.</p>
+        <p>Using 100 epochs means that the model is now using more epochs than normal (90 epochs). This means that the prediction is quite unlikely to change, and any changes are likely to be minimal. While adding more epochs means it is being further fine-tuned, at the later epochs, the probabilites hsouldn't be changing much. Drastic changes in the output due to adding a few more epochs can be a sign of a bad dataset/model and can signal a problem on a more fundamental level.</p>
+        <div style="display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap;">
+          <button onclick="goToEpoch50()" style="flex: 1; padding: 0.7rem; background: #4a4aff; color: white; border: none; border-radius: 8px; cursor: pointer;">Try with 50 epochs!</button>
+          <button onclick="goToEpoch200()" style="flex: 1; padding: 0.7rem; background: #4a4aff; color: white; border: none; border-radius: 8px; cursor: pointer;">Try with 200 epochs!</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MIDDLE GRID SECTION -->
+  <div class="mid-grid">
+
+
+    <div class="card">
+      <h3>❓ Why This Classification?</h3>
+      <p id="explanationText">The model identified this as a dog with high confidence based on distinctive domestic dog features including floppy ears and a visible collar.</p>
+    </div>
+
+    <div class="card">
+      <h3>⬅️ How was this explanation generated?</h3>
+      <p>This explanation has been generated by a Large Language Model (LLM) - an AI trained on very large amounts of text in order to understand and generate human language. When the image classifier makes a prediction, three main pieces of information are sent to the LLM: the top predictions with their confidence scores, the original image, and the heatmap, which shows the areas in the image the classifier focused on.</p>
+      <p>The LLM analyses these inputs and generates an explanation by recognising patterns between the classifier's prediction and the typical visual features of the predicted animal. It looks at the animals predicted, the confidence levels and the heatmap to figure out whether the prediction makes sense.</p>
+    </div>
+
+  </div>
+
+<script>
+function goToHome() {
+    window.location.href = "{{ url_for('home') }}";
+}
+function goToComparison() {
+    window.location.href = "{{ url_for('comparison') }}";
+}
+function goToExplainability() {
+    window.location.href = "{{ url_for('explanability') }}";
+}
+function goToEpoch50() {
+    window.location.href = "{{ url_for('epoch50') }}";
+}
+function goToEpoch100() {
+    window.location.href = "{{ url_for('epoch100') }}";
+}
+function goToEpoch200() {
+    window.location.href = "{{ url_for('epoch200') }}";
+}
+
+</script>
+
+<script>
+// Store predicted animal in localStorage on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const predictedAnimal = "Dog"; // replace dynamically with actual prediction
+    localStorage.setItem("predictedAnimal", predictedAnimal);
+});
+</script>
+  </div>
+
+</div>
+
+<!-- ---------- LOAD UPLOADED IMAGE FROM LOCAL STORAGE ---------- -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const img = document.getElementById("previewImage");
+
+    const savedFilename = localStorage.getItem("uploadedFilename");
+
+    if (savedFilename) {
+        img.src = "/uploads/" + savedFilename;
+    } else {
+        img.src = "static/default.png";
+    }
+
+    const gradcam = document.getElementById("GradCamImage");
+    const gradcamFilename = localStorage.getItem("gradcam_filename");
+    if (gradcamFilename) {
+        gradcam.src = "/gradcams/" + gradcamFilename;
+    } else {
+        gradcam.src = "static/default.png";
+    }
+
+    const mostLikely = localStorage.getItem("most_likely");
+    const mostLikelyProb = localStorage.getItem("most_likely_prob");
+    const mostLikelyProb50 = localStorage.getItem("most_likely_prob_50");
+    const mostLikelyProb200 = localStorage.getItem("most_likely_prob_200");
+    const secondMost = localStorage.getItem("second_most");
+    const secondMostProb = localStorage.getItem("second_most_prob");
+    const secondMostProb50 = localStorage.getItem("second_most_prob_50");
+    const thirdMost = localStorage.getItem("third_most");
+    const thirdMostProb = localStorage.getItem("third_most_prob");
+    const thirdMostProb50 = localStorage.getItem("third_most_prob_50");
+    const thirdMostProb200 = localStorage.getItem("third_most_prob_200");
+
+
+    document.getElementById("predictionTitle").textContent = mostLikely;
+
+
+    const results = document.querySelectorAll('.result-row');
+
+    // First result
+    results[0].querySelector('span:first-child').textContent = mostLikely;
+    results[0].querySelector('span:last-child').textContent = mostLikelyProb + '%';
+    results[0].nextElementSibling.querySelector('.bar-fill').style.width = mostLikelyProb + '%';
+
+    // Second result
+    results[1].querySelector('span:first-child').textContent = secondMost;
+    results[1].querySelector('span:last-child').textContent = secondMostProb + '%';
+    results[1].nextElementSibling.querySelector('.bar-fill').style.width = secondMostProb + '%';
+
+    // Third result
+    results[2].querySelector('span:first-child').textContent = thirdMost;
+    results[2].querySelector('span:last-child').textContent = thirdMostProb + '%';
+    results[2].nextElementSibling.querySelector('.bar-fill').style.width = thirdMostProb + '%';
+
+    // Inject LLM explanation into text box
+    const explanation = localStorage.getItem("explanation")
+    document.getElementById("explanationText").textContent = explanation
+
+
+});
+</script>
+
+</body>
+</html>
