@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
+<head>
+<meta charset="UTF-8">
+
+<script src="/static/script.js" defer></script>
+
+<title>01 - Home</title>
+<link rel="canonical" href="https://crista-ikkj5s33n3.figweb.site/">
+<meta name="description" content="Created with figma.to.website">
+
+<meta name="viewport" content="width=device-width">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link rel="stylesheet" href="/static/style.css">
+
+<!-- TensorFlow.js + MobileNet -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.3.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0/dist/mobilenet.min.js"></script>
+
+</head>
+<body id="_">
+  <div id="F1">
+    <div id="Container">
+
+      <!-- HEADER -->
+      <div id="Container_0">
+        <h1 id="Heading_1">
+          <span id="_5_62"><span id="__0" class="text">Explainable Animal Classifier</span></span>
+        </h1>
+        <p id="Container_1">
+          <span id="_5_64"><span id="__1" class="text">Understanding AI decisions through transparent explanations</span></span>
+        </p>
+      </div>
+
+      <!-- UPLOAD CARD -->
+      <div id="Background_Shadow">
+        <div id="Background_Border">
+          <div id="Container_2">
+            <span id="_5_68"><span id="__2" class="text"><img src="static/uploaded_images/logo.png" id="logo"></span></span>
+          </div>
+          <h2 id="Heading_2">
+            <span id="_5_70"><span id="__3" class="text">Upload Animal Image</span></span>
+          </h2>
+          <p id="Container_3">
+            <span id="_5_72"><span id="__4" class="text">Drag and drop an image here, or click to browse</span></span>
+          </p>
+
+          <!-- BUTTONS -->
+          <div id="Container_4">
+            <input type="file" id="fileInput" accept="image/*" hidden>
+
+            <button id="Button">
+              <span id="_5_75"><span id="__5" class="text">📷 Choose Image</span></span>
+            </button>
+            <button id="Button_0">
+              <span id="_5_77"><span id="__6" class="text">📷 Take Photo</span></span>
+            </button>
+            <p id="infoText"></p>
+          </div>
+          <div id="previewArea" style="display: none;">
+            <img id="previewImg" src="" alt="uploaded_images"/>
+            <img id="uploadedImageDisplay" alt="Uploaded image" />
+            <button id="detailsBtn">View Details</button>
+            <button id="chooseBtn">📷 Choose Image</button>
+          </div>
+
+          <p id="Container_5">
+            <span id="_5_79"><span id="__7" class="text">Supported formats: JPG, PNG, WebP • Max size: 10MB</span></span>
+          </p>
+        </div>
+      </div>
+
+
+      <div id="Background_Shadow_0">
+        <!-- ⭐ ADDED EXPLAINABILITY SECTION (SHORT + NON-DESIGN CHANGING) -->
+        <div style="padding: 20px; padding-top: 10px;">
+          <p style="font-size:16px; line-height:1.4;">
+            <strong>🔍 Model Explainability:</strong> This classifier uses MobileNet (CNN), which identifies shapes, textures,
+            and color patterns to classify animals. Heatmaps highlight where the AI focused, improving transparency.
+            Minor variations in lighting or angle may influence predictions.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>
